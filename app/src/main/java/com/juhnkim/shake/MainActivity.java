@@ -7,6 +7,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,19 +20,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private ImageView image;
     private SensorManager sensorManager;
     private Sensor gyroSensor;
+    private Sensor accelSensor;
     private TextView tv;
+
+    private TextView tv2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        tv =findViewById(R.id.textView);
-        tv.setText("X: \nY: \nZ:");
+        tv = findViewById(R.id.textView);
+        tv.setText("Gyroscope \nX: \nY: \nZ:");
+
+        tv2 = findViewById(R.id.textView2);
 
         // Initialize the SensorManager and the gyroscope sensor
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
+        accelSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
         image = findViewById(R.id.imageView);
         // Register the listener for the sensor
@@ -55,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
             // Threshold for detecting a shake or rapid rotation.
             // You can calibrate this value as needed.
-            final float THRESHOLD = 3.0f;
+            final float THRESHOLD = 5;
 
             // Update the text view with the gyroscope data
             tv.setText("X: " + x + "\nY: " + y + "\nZ: " + z);
@@ -71,6 +79,14 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Intent intent = new Intent(MainActivity.this, SecondActivity.class);
                 startActivity(intent);
             }
+        }  else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float ax = event.values[0];
+            float ay = event.values[1];
+            float az = event.values[2];
+
+            // You can display these values in your UI here
+            // For example, appending it to your TextView:
+            tv2.setText("\nAccelerometer:\nAX: " + ax + "\nAY: " + ay + "\nAZ: " + az);
         }
     }
 
@@ -83,7 +99,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     protected void onPause() {
         super.onPause();
         // Unregister the sensor listener to save battery
-        sensorManager.unregisterListener(this);
+        sensorManager.unregisterListener(this, gyroSensor);
+        sensorManager.unregisterListener(this, accelSensor);
     }
 
     @Override
@@ -91,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         super.onResume();
         // Re-register the sensor listener
         sensorManager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void rotateImage(float x, float y, float z) {
