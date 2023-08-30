@@ -1,17 +1,12 @@
 package com.juhnkim.shake;
 
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,9 +14,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -100,13 +92,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 startActivity(intent);
             }
         } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float ax = event.values[0];
-            float ay = event.values[1];
-            float az = event.values[2];
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
 
             // You can display these values in your UI here
             // For example, appending it to your TextView:
-            tv2.setText("\nAccelerometer:\nAX: " + ax + "\nAY: " + ay + "\nAZ: " + az);
+            tv2.setText("\nAccelerometer:\nX: " + x + "\nY: " + y + "\nZ: " + z);
         }
     }
 
