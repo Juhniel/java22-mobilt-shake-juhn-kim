@@ -1,19 +1,27 @@
 package com.juhnkim.shake;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -24,6 +32,8 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private TextView tv;
 
     private TextView tv2;
+
+    private Sensor humidSensor;
 
 
     @Override
@@ -40,10 +50,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         gyroSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
         accelSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        humidSensor = sensorManager.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+
 
         image = findViewById(R.id.imageView);
         // Register the listener for the sensor
         sensorManager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, humidSensor, SensorManager.SENSOR_DELAY_NORMAL);
 
         Button nextABtn = findViewById(R.id.nextActivityBtn);
 
@@ -56,6 +69,13 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
     @Override
     public void onSensorChanged(SensorEvent event) {
+        if (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
+            float humidity = event.values[0];
+            final float HUMIDITY_THRESHOLD = 60.0f;  // Change as required
+            if (humidity > HUMIDITY_THRESHOLD) {
+               showHumidity();
+            }
+        }
         if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
             float x = event.values[0];
             float y = event.values[1];
@@ -79,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 Intent intent = new Intent(MainActivity.this, SecondActivity.class);
                 startActivity(intent);
             }
-        }  else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
             float ax = event.values[0];
             float ay = event.values[1];
             float az = event.values[2];
@@ -101,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Unregister the sensor listener to save battery
         sensorManager.unregisterListener(this, gyroSensor);
         sensorManager.unregisterListener(this, accelSensor);
+        sensorManager.unregisterListener(this, humidSensor);
     }
 
     @Override
@@ -109,6 +130,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         // Re-register the sensor listener
         sensorManager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_NORMAL);
         sensorManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_NORMAL);
+        sensorManager.registerListener(this, humidSensor, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     private void rotateImage(float x, float y, float z) {
@@ -119,5 +141,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
 
         // Apply rotation to the ImageView
         image.setRotation(image.getRotation() + xDegree + yDegree + zDegree);
+    }
+
+    private void showHumidity() {
+        Toast.makeText(this, "Its quite humid..", Toast.LENGTH_LONG).show();
     }
 }
