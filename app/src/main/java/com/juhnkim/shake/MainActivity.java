@@ -63,42 +63,44 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_RELATIVE_HUMIDITY) {
             float humidity = event.values[0];
-            final float HUMIDITY_THRESHOLD = 60.0f;  // Change as required
+            final float HUMIDITY_THRESHOLD = 60.0f;
             if (humidity > HUMIDITY_THRESHOLD) {
-               showHumidity();
+                showHumidity();
             }
         }
+
         if (event.sensor.getType() == Sensor.TYPE_GYROSCOPE) {
             float x = event.values[0];
             float y = event.values[1];
             float z = event.values[2];
 
-            // Threshold for detecting a shake or rapid rotation.
-            // You can calibrate this value as needed.
-            final float THRESHOLD = 5;
-
             // Update the text view with the gyroscope data
-            tv.setText("X: " + x + "\nY: " + y + "\nZ: " + z);
+            tv.setText("Gyroscope:\n X: " + x + "\nY: " + y + "\nZ: " + z);
 
-            // rotate image
+            // Rotate image based on gyroscope values
             rotateImage(x, y, z);
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float x = event.values[0];
+            float y = event.values[1];
+            float z = event.values[2];
+
+            // Update accelerometer values to TextView
+            tv2.setText("\nAccelerometer:\nX: " + x + "\nY: " + y + "\nZ: " + z);
+
+            // Threshold for detecting a shake or rapid rotation.
+            final float THRESHOLD = 10;
+
             // Check if any of the axes cross the threshold
             if (Math.abs(x) > THRESHOLD || Math.abs(y) > THRESHOLD || Math.abs(z) > THRESHOLD) {
-                Log.d("SensorData", "Rapid rotation detected: " +
+                Log.d("SensorData", "Rapid shake detected: " +
                         "X: " + x +
                         " Y: " + y +
                         " Z: " + z);
                 Intent intent = new Intent(MainActivity.this, SecondActivity.class);
                 startActivity(intent);
             }
-        } else if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-            float x = event.values[0];
-            float y = event.values[1];
-            float z = event.values[2];
-
-            // You can display these values in your UI here
-            // For example, appending it to your TextView:
-            tv2.setText("\nAccelerometer:\nX: " + x + "\nY: " + y + "\nZ: " + z);
         }
     }
 
